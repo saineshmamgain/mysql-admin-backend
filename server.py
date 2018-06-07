@@ -1,3 +1,9 @@
+# File: server.py
+# Created By: Sainesh Mamgain
+# Email: saineshmamgain@gmail.com
+# Date: 7/6/18
+# Time: 11:00 AM
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from urllib.parse import urlparse
@@ -35,18 +41,20 @@ class S(BaseHTTPRequestHandler):
     def handle_request(self):
         module_list = self.get_module()
         if module_list is None:
-            self._set_headers(response_type=200, headers={'Content-Type': 'application/json'})
-            self.wfile.write(json.dumps({'status': 1, 'message': 'success'}).encode())
+            self.send_the_response(response_type=200, headers={'Content-Type': 'application/json'}, body=json.dumps({'status': 1, 'message': 'success'}))
         elif module_list == 0:
             response = Errors.error404()
-            self._set_headers(response_type=response['type'], headers=response['headers'])
-            self.wfile.write(response['body'].encode())
+            self.send_the_response(response['type'], response['headers'], response['body'])
         else:
             mod = import_module('modules.' + module_list['module'])
             action = getattr(mod, module_list['action'])
             response = action()
-            self._set_headers(response_type=response['type'], headers=response['headers'])
-            self.wfile.write(response['body'].encode())
+            self.send_the_response(response['type'],response['headers'],response['body'])
+
+
+    def send_the_response(self, response_type, headers, body):
+        self._set_headers(response_type=response_type, headers=headers)
+        self.wfile.write(body.encode())
 
     def do_GET(self):
         self.handle_request()
