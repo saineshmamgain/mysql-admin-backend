@@ -1,11 +1,11 @@
-import http.server
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-import urllib.parse
+from urllib.parse import urlparse
 from importlib import import_module
 from modules import Errors
 
 
-class S(http.server.BaseHTTPRequestHandler):
+class S(BaseHTTPRequestHandler):
 
     def _set_headers(self, response_type=200, headers={}):
         self.send_response(response_type)
@@ -18,7 +18,7 @@ class S(http.server.BaseHTTPRequestHandler):
         return ''.join(word.capitalize() for word in module_name.split('-'))
 
     def get_module(self):
-        parsed = urllib.parse.urlparse(self.path)
+        parsed = urlparse(self.path)
         print('path:', parsed)
         path = parsed.path
         if path == '/':
@@ -52,10 +52,10 @@ class S(http.server.BaseHTTPRequestHandler):
         self.handle_request()
 
 
-def run(server_class=http.server.HTTPServer, handler_class=S, port=8080):
+def run(server_class=HTTPServer, handler_class=S, port=8080):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
-    print('Starting httpd...')
+    print('Starting server at http://127.0.0.1:'+ str(port))
     httpd.serve_forever()
 
 
